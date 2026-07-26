@@ -7,16 +7,8 @@ import pandas as pd
 import logging
 
 
-# -----------------------------
-# File location
-# -----------------------------
-
 RAW_FILE = "/opt/airflow/data/raw/orders.csv"
 
-
-# -----------------------------
-# DAG settings
-# -----------------------------
 
 default_args = {
     "owner": "analytics_team",
@@ -32,10 +24,6 @@ default_args = {
     ],
 }
 
-
-# -----------------------------
-# ETL Functions
-# -----------------------------
 
 def extract_orders():
 
@@ -58,15 +46,12 @@ def validate_orders():
     df = pd.read_csv(RAW_FILE)
 
 
-    # Check if file is empty
 
     if df.empty:
         raise ValueError(
             "Orders file is empty"
         )
 
-
-    # Required columns
 
     required_columns = [
         "order_id",
@@ -85,7 +70,6 @@ def validate_orders():
             )
 
 
-    # Check missing values
 
     missing_values = df.isnull().sum()
 
@@ -110,9 +94,6 @@ def load_staging():
     df = pd.read_csv(RAW_FILE)
 
 
-    # In a real project:
-    # df.to_sql("staging_orders", connection)
-
 
     logging.info(
         f"Loaded {len(df)} rows into staging_orders"
@@ -130,7 +111,6 @@ def transform_orders():
     df = pd.read_csv(RAW_FILE)
 
 
-    # Create calculated field
 
     df["total_sales"] = (
         df["quantity"] *
@@ -144,9 +124,6 @@ def transform_orders():
 
 
 
-# -----------------------------
-# DAG Definition
-# -----------------------------
 
 with DAG(
 
@@ -171,9 +148,7 @@ with DAG(
 ) as dag:
 
 
-    # -----------------------------
-    # Sensor
-    # -----------------------------
+
 
     check_orders_file = FileSensor(
 
@@ -188,9 +163,6 @@ with DAG(
     )
 
 
-    # -----------------------------
-    # Extract
-    # -----------------------------
 
     extract_task = PythonOperator(
 
@@ -201,10 +173,6 @@ with DAG(
     )
 
 
-    # -----------------------------
-    # Validation
-    # -----------------------------
-
     validate_task = PythonOperator(
 
         task_id="validate_orders",
@@ -214,9 +182,6 @@ with DAG(
     )
 
 
-    # -----------------------------
-    # Load staging
-    # -----------------------------
 
     staging_task = PythonOperator(
 
@@ -227,10 +192,6 @@ with DAG(
     )
 
 
-    # -----------------------------
-    # Transformation
-    # -----------------------------
-
     transform_task = PythonOperator(
 
         task_id="transform_orders",
@@ -238,11 +199,6 @@ with DAG(
         python_callable=transform_orders
 
     )
-
-
-    # -----------------------------
-    # Dependencies
-    # -----------------------------
 
     (
         check_orders_file
