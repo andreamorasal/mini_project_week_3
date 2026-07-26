@@ -28,7 +28,7 @@ default_args = {
     # Failure email alerts
     "email_on_failure": True,
     "email": [
-        "moralessalcedoandrea@gmail.com"
+        "MYEMAIL@gmail.com"
     ],
 }
 
